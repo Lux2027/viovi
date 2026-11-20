@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Viovi – Sprachassistent</title>
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Viovi">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">◉</span>
+      <div>
+        <h1>Viovi</h1>
+        <p id="today-label" class="muted"></p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <label class="switch" title="Freihand: Viovi hört nach jeder Antwort automatisch weiter zu">
+        <input type="checkbox" id="handsfree"> <span>Freihand</span>
+      </label>
+      <button id="notify-btn" class="ghost" title="Benachrichtigungen erlauben">🔔</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button data-view="heute" class="active">Heute</button>
+    <button data-view="kalender">Kalender</button>
+    <button data-view="notizen">Notizen</button>
+    <button data-view="erinnerungen">Erinnerungen</button>
+  </nav>
+
+  <main>
+    <!-- HEUTE -->
+    <section id="view-heute" class="view active">
+      <div class="card">
+        <h2>Termine heute</h2>
+        <ul id="today-events" class="list"></ul>
+      </div>
+      <div class="card">
+        <h2>Nächste Erinnerungen</h2>
+        <ul id="today-reminders" class="list"></ul>
+      </div>
+      <div class="card">
+        <h2>Neueste Notizen</h2>
+        <ul id="today-notes" class="list"></ul>
+      </div>
+      <div class="card">
+        <h2>Probier es aus – sag zum Beispiel:</h2>
+        <div id="examples" class="chips"></div>
+      </div>
+    </section>
+
+    <!-- KALENDER -->
+    <section id="view-kalender" class="view">
+      <div class="card">
+        <div class="cal-head">
+          <button id="cal-prev" class="ghost">‹</button>
+          <h2 id="cal-title"></h2>
+          <button id="cal-next" class="ghost">›</button>
+        </div>
+        <div class="cal-grid cal-weekdays">
+          <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+      </div>
+      <div class="card">
+        <h2 id="day-title"></h2>
+        <ul id="day-list" class="list"></ul>
+      </div>
+    </section>
+
+    <!-- NOTIZEN -->
+    <section id="view-notizen" class="view">
+      <div class="card">
+        <h2>Alle Notizen</h2>
+        <ul id="notes-list" class="list"></ul>
+      </div>
+    </section>
+
+    <!-- ERINNERUNGEN -->
+    <section id="view-erinnerungen" class="view">
+      <div class="card">
+        <h2>Offen</h2>
+        <ul id="rem-open" class="list"></ul>
+      </div>
+      <div class="card">
+        <h2>Erledigt</h2>
+        <ul id="rem-done" class="list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sprach-Leiste unten -->
+  <footer class="dock">
+    <div id="bubble-user" class="bubble user hidden"></div>
+    <div id="bubble-bot" class="bubble bot">Hallo! Tippe auf das Mikrofon und sag, was du möchtest. Sag „Hilfe“, um alle Befehle zu hören.</div>
+    <div class="dock-row">
+      <form id="text-form" class="text-form">
+        <input id="text-input" type="text" placeholder="…oder hier tippen" autocomplete="off">
+      </form>
+      <button id="mic" class="mic" aria-label="Sprechen">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+      </button>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="parser.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
