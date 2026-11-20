@@ -11,7 +11,13 @@
     const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
     if (saved) data = Object.assign(data, saved);
   } catch (e) { /* leer starten */ }
-  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {} };
+  const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {} };
+  // Speichern: auf dem Gerät + (wenn angemeldet) in die Cloud
+  const save = () => {
+    data.updatedAt = new Date().toISOString();
+    persist();
+    if (window.VioviCloud) window.VioviCloud.push(data);
+  };
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   let pending = null;      // wartet auf Rückfrage (z. B. "Wann?")
@@ -228,7 +234,7 @@
     '• „Zeige Kalender“',
   ].join('\n');
 
-  function countWord(n, one, many) { return (n === 1 ? 'eine ' + one : n + ' ' + many); }
+  function countWord(n, one, many, article = 'eine') { return (n === 1 ? article + ' ' + one : n + ' ' + many); }
   const openReminders = () => data.reminders.filter((r) => !r.done).sort((a, b) => new Date(a.due) - new Date(b.due));
   const eventsOn = (day) => data.events.filter((e) => sameDay(new Date(e.start), day)).sort((a, b) => new Date(a.start) - new Date(b.start));
   const remindersOn = (day) => openReminders().filter((r) => sameDay(new Date(r.due), day));
@@ -248,7 +254,7 @@
     showDay(day);
     if (!ev.length && !rem.length) return capital(label) + ' hast du nichts geplant.';
     let out = '';
-    if (ev.length) out += capital(label) + ' hast du ' + countWord(ev.length, 'Termin', 'Termine') + ': ' + ev.map(evText).join(', ') + '.';
+    if (ev.length) out += capital(label) + ' hast du ' + countWord(ev.length, 'Termin', 'Termine', 'einen') + ': ' + ev.map(evText).join(', ') + '.';
     if (rem.length) out += (out ? '\n' : capital(label) + ' ') + 'Erinnerungen: ' + rem.map((r) => fmtTime(new Date(r.due)) + ' Uhr ' + r.text).join(', ') + '.';
     return out;
   }
@@ -364,7 +370,9 @@
     items.forEach((x) => ul.appendChild(x));
   }
   function delBtn(list, id) {
-    return '<button class="del" data-del="' + list + '" data-id="' + id + '" title="Löschen">🗑</button>';
+    return '<button class="edit" data-edit="' + list + '" data-id="' + id + '" title="Bearbeiten" aria-label="Bearbeiten">' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' +
+      '<button class="del" data-del="' + list + '" data-id="' + id + '" title="Löschen" aria-label="Löschen">🗑</button>';
   }
   function eventLi(e, withDay) {
     const d = new Date(e.start);
@@ -430,14 +438,121 @@
   }
 
   // ---------- Klicks & Eingaben ----------
+  function deleteItem(list, id) {
+    const arr = data[list];
+    const pos = arr.findIndex((x) => x.id === id);
+    if (pos < 0) return;
+    lastDeleted = { list, pos, item: arr[pos] };
+    arr.splice(pos, 1); save(); render();
+    $('bubble-bot').textContent = 'Gelöscht. Sag „rückgängig“, um es wiederherzustellen.';
+  }
   document.addEventListener('click', (e) => {
     const del = e.target.closest('[data-del]');
-    if (del) {
-      const arr = data[del.dataset.del];
-      const pos = arr.findIndex((x) => x.id === del.dataset.id);
-      if (pos >= 0) { lastDeleted = { list: del.dataset.del, pos, item: arr[pos] }; arr.splice(pos, 1); save(); render(); $('bubble-bot').textContent = 'Gelöscht. Sag „rückgängig“, um es wiederherzustellen.'; }
+    if (del) return deleteItem(del.dataset.del, del.dataset.id);
+    const ed = e.target.closest('[data-edit]');
+    if (ed) return openEditor(ed.dataset.edit, ed.dataset.id);
+    // Antippen des Eintrags selbst öffnet ebenfalls das Bearbeiten
+    const row = e.target.closest('.list li .main');
+    if (row) {
+      const btn = row.parentElement.querySelector('[data-edit]');
+      if (btn) return openEditor(btn.dataset.edit, btn.dataset.id);
     }
+    if (e.target.closest('[data-close]') || e.target.classList.contains('sheet')) closeSheets();
   });
+
+  // ---------- Fenster von unten (Menü, Bearbeiten) ----------
+  function openSheet(id) {
+    const s = $(id);
+    s.classList.remove('hidden', 'closing');
+  }
+  function closeSheets() {
+    document.querySelectorAll('.sheet:not(.hidden)').forEach((s) => {
+      s.classList.add('closing');
+      setTimeout(() => s.classList.add('hidden'), 200);
+    });
+  }
+  function showDialog(html) {
+    $('sheet-body').innerHTML = html;
+    openSheet('sheet');
+  }
+  $('menu-btn').onclick = () => { if (window.VioviCloud) window.VioviCloud.renderAccount(); openSheet('menu'); };
+
+  // ---------- Bearbeiten ----------
+  const pad = (n) => String(n).padStart(2, '0');
+  const dateVal = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const timeVal = (d) => pad(d.getHours()) + ':' + pad(d.getMinutes());
+  function readDate(dateStr, timeStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const [h, mi] = (timeStr || '00:00').split(':').map(Number);
+    return new Date(y, m - 1, d, h || 0, mi || 0);
+  }
+  const KIND = {
+    events: { title: 'Termin bearbeiten', icon: 'cal' },
+    reminders: { title: 'Erinnerung bearbeiten', icon: 'rem' },
+    notes: { title: 'Notiz bearbeiten', icon: 'note' },
+  };
+  function openEditor(list, id) {
+    const item = data[list].find((x) => x.id === id);
+    if (!item) return;
+    let fields = '';
+    if (list === 'events') {
+      const d = new Date(item.start);
+      fields =
+        '<label class="field"><span>Was?</span><input name="text" value="' + esc(item.title) + '" required></label>' +
+        '<div class="field-row">' +
+        '<label class="field"><span>Datum</span><input type="date" name="date" value="' + dateVal(d) + '" required></label>' +
+        '<label class="field"><span>Uhrzeit</span><input type="time" name="time" value="' + (item.allDay ? '' : timeVal(d)) + '"' + (item.allDay ? ' disabled' : '') + '></label>' +
+        '</div>' +
+        '<label class="check-row"><input type="checkbox" name="allDay"' + (item.allDay ? ' checked' : '') + '> Ganztägig</label>';
+    } else if (list === 'reminders') {
+      const d = new Date(item.due);
+      fields =
+        '<label class="field"><span>Woran?</span><input name="text" value="' + esc(item.text) + '" required></label>' +
+        '<div class="field-row">' +
+        '<label class="field"><span>Datum</span><input type="date" name="date" value="' + dateVal(d) + '" required></label>' +
+        '<label class="field"><span>Uhrzeit</span><input type="time" name="time" value="' + timeVal(d) + '" required></label>' +
+        '</div>' +
+        '<label class="check-row"><input type="checkbox" name="done"' + (item.done ? ' checked' : '') + '> Erledigt</label>';
+    } else {
+      fields = '<label class="field"><span>Notiz</span><textarea name="text" rows="5" required>' + esc(item.text) + '</textarea></label>';
+    }
+    showDialog(
+      '<form id="edit-form" class="edit-form">' +
+      '<h2 class="sheet-title"><span class="ic ' + KIND[list].icon + '"></span>' + KIND[list].title + '</h2>' +
+      fields +
+      '<div class="btn-row">' +
+      '<button type="button" class="btn btn-danger-soft" id="edit-del">Löschen</button>' +
+      '<button type="button" class="btn btn-light" data-close>Abbrechen</button>' +
+      '<button type="submit" class="btn btn-primary">Speichern</button>' +
+      '</div></form>'
+    );
+    // Symbol aus der Kopfzeile der Karten übernehmen
+    const srcIcon = document.querySelector('.ic.' + KIND[list].icon + ' svg');
+    if (srcIcon) $('sheet-body').querySelector('.ic').appendChild(srcIcon.cloneNode(true));
+    const f = $('edit-form');
+    if (f.allDay) f.allDay.onchange = () => { f.time.disabled = f.allDay.checked; if (!f.allDay.checked && !f.time.value) f.time.value = '09:00'; };
+    $('edit-del').onclick = () => { closeSheets(); deleteItem(list, id); };
+    f.onsubmit = (ev) => {
+      ev.preventDefault();
+      const text = f.text.value.trim();
+      if (!text) return;
+      if (list === 'events') {
+        item.title = text;
+        item.allDay = f.allDay.checked;
+        item.start = readDate(f.date.value, item.allDay ? '00:00' : f.time.value).toISOString();
+      } else if (list === 'reminders') {
+        item.text = text;
+        const due = readDate(f.date.value, f.time.value);
+        if (due.toISOString() !== item.due) { item.due = due.toISOString(); item.fired = item.done || due <= new Date(); }
+        item.done = f.done.checked;
+        if (item.done) item.fired = true;
+      } else {
+        item.text = text;
+      }
+      save(); render(); closeSheets();
+      $('bubble-bot').textContent = 'Gespeichert.';
+    };
+  }
   document.addEventListener('change', (e) => {
     const id = e.target.dataset && e.target.dataset.done;
     if (!id) return;
@@ -474,7 +589,6 @@
     $('kbd-btn').classList.toggle('active', show);
     if (show) $('text-input').focus();
   };
-  $('help-btn').onclick = () => { showUser('„Hilfe“'); handleInput('Hilfe'); };
   $('handsfree').onchange = (e) => {
     if (e.target.checked) { askNotify(); startListening(); } else stopListening();
   };
@@ -505,6 +619,56 @@
     $('examples').appendChild(b);
   });
 
+  // ---------- Sprechblasen: kurz einblenden, dann von selbst ausblenden ----------
+  let bubbleTimer;
+  function hideBubbles() {
+    clearTimeout(bubbleTimer);
+    $('bubble-bot').classList.add('hidden');
+    $('bubble-user').classList.add('hidden');
+  }
+  new MutationObserver(() => {
+    const bot = $('bubble-bot');
+    const text = bot.textContent.trim();
+    bot.classList.toggle('hidden', !text);
+    clearTimeout(bubbleTimer);
+    // Lange Antworten (z. B. Hilfe) bleiben länger stehen
+    if (text) bubbleTimer = setTimeout(hideBubbles, Math.max(5000, text.length * 70));
+  }).observe($('bubble-bot'), { childList: true, characterData: true, subtree: true });
+  $('bubble-bot').onclick = hideBubbles;
+  $('bubble-user').onclick = hideBubbles;
+
+  // ---------- Einführung beim ersten Start ----------
+  const INTRO_KEY = 'viovi-intro-done';
+  function showIntro() {
+    const box = $('intro');
+    const slides = box.querySelectorAll('.intro-slide');
+    const dots = box.querySelectorAll('.intro-dots span');
+    let i = 0;
+    const go = (n) => {
+      i = n;
+      slides.forEach((s, k) => s.classList.toggle('active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('active', k === i));
+      $('intro-next').textContent = i === slides.length - 1 ? 'Los geht’s' : 'Weiter';
+    };
+    const close = () => {
+      box.classList.add('hidden');
+      try { localStorage.setItem(INTRO_KEY, '1'); } catch (e) {}
+      if (location.search) history.replaceState(null, '', location.pathname);
+    };
+    $('intro-next').onclick = () => (i < slides.length - 1 ? go(i + 1) : close());
+    $('intro-skip').onclick = close;
+    go(0);
+    box.classList.remove('hidden');
+  }
+  function maybeIntro() {
+    let introDone = false;
+    try { introDone = localStorage.getItem(INTRO_KEY) === '1'; } catch (e) {}
+    if (!introDone || /[?&]intro=1/.test(location.search)) showIntro();
+  }
+  // Mit Cloud zeigt cloud.js die Einführung erst nach dem Anmelden
+  const cloudOn = !!(window.VIOVI_CONFIG && window.VIOVI_CONFIG.supabaseUrl);
+  if (!cloudOn) maybeIntro();
+
   // ---------- Start ----------
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -515,5 +679,18 @@
   setInterval(checkReminders, 5000);
   setInterval(() => { if (view === 'heute') render(); }, 60000);
 
-  window.Viovi = { handleInput, data: () => data };
+  window.Viovi = {
+    handleInput,
+    data: () => data,
+    // Daten aus der Cloud übernehmen (ohne erneut hochzuladen)
+    setData(next) {
+      data = Object.assign({ events: [], notes: [], reminders: [] }, next);
+      persist(); render();
+    },
+    clearLocal() {
+      data = { events: [], notes: [], reminders: [] };
+      persist(); render();
+    },
+    maybeIntro, showDialog, closeSheets, esc,
+  };
 })();

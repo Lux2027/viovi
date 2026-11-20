@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Viovi – Fragen & Antworten</title>
+  <meta name="theme-color" content="#f3f4fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e0f16" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css?v=5">
+  <style>
+    body { padding-bottom: 40px; }
+    .page-head { display: flex; align-items: center; gap: 12px; }
+    .back {
+      width: 44px; height: 44px; border-radius: 14px; flex: none;
+      display: grid; place-items: center; text-decoration: none; color: var(--text);
+      background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow);
+    }
+    .hero { text-align: center; padding: 6px 4px 4px; }
+    .hero .logo { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 12px; }
+    .hero .logo svg { width: 34px; height: 34px; }
+    .hero h2 { justify-content: center; font-size: 1.15rem; margin-bottom: 6px; }
+    .hero p { color: var(--muted); margin: 0; line-height: 1.5; }
+    .section-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 4px -4px; }
+    details { border-top: 1px solid var(--line); }
+    details:first-of-type { border-top: none; }
+    summary {
+      list-style: none; cursor: pointer; padding: 14px 2px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      font-weight: 600; -webkit-tap-highlight-color: transparent;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+"; flex: none; width: 26px; height: 26px; border-radius: 8px;
+      display: grid; place-items: center; font-weight: 700;
+      background: var(--accent-soft); color: var(--accent-text); transition: transform .2s;
+    }
+    details[open] summary::after { transform: rotate(45deg); }
+    details .answer { color: var(--muted); line-height: 1.55; padding: 0 2px 14px; animation: rise .25s ease both; }
+    details .answer p { margin: 0 0 8px; }
+    details .answer ol, details .answer ul { margin: 0 0 8px; padding-left: 20px; }
+    details .answer b { color: var(--text); }
+    .say { display: grid; gap: 6px; margin-top: 4px; }
+    .say span { background: var(--accent-soft); color: var(--accent-text); border-radius: 12px; padding: 7px 12px; font-size: .88rem; }
+    .cta {
+      display: block; text-align: center; text-decoration: none; color: #fff; font-weight: 700;
+      background: var(--grad); border-radius: 16px; padding: 14px;
+      box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+    .cta.light { background: var(--card); color: var(--accent-text); border: 1px solid var(--line); box-shadow: var(--shadow); }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="page-head">
+      <a class="back" href="./" aria-label="Zurück zur App">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </a>
+      <div>
+        <h1>Hilfe</h1>
+        <p class="muted">Fragen &amp; Antworten zu Viovi</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="view active">
+      <div class="card hero">
+        <span class="logo"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></span>
+        <h2>Was ist Viovi?</h2>
+        <p>Viovi ist dein Kalender, Notizbuch und Erinnerungs-Helfer – den du einfach mit deiner Stimme bedienst.</p>
+      </div>
+
+      <p class="section-title">Erste Schritte</p>
+      <div class="card">
+        <details>
+          <summary>Wie benutze ich Viovi?</summary>
+          <div class="answer">
+            <p>Tippe unten auf das große <b>Mikrofon</b> und sprich ganz normal. Viovi trägt alles für dich ein und antwortet dir.</p>
+            <p>Du willst lieber tippen? Dann tippe links unten auf die <b>Tastatur</b>.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Was kann ich alles sagen?</summary>
+          <div class="answer">
+            <div class="say">
+              <span>„Termin morgen um 15 Uhr Zahnarzt“</span>
+              <span>„Trage am 3. Dezember um 10 Uhr Meeting mit Anna ein“</span>
+              <span>„Erinnere mich in 20 Minuten an die Wäsche“</span>
+              <span>„Notiz: Milch und Brot kaufen“</span>
+              <span>„Was steht heute an?“</span>
+              <span>„Lies meine Notizen vor“</span>
+              <span>„Wäsche erledigt“</span>
+              <span>„Lösche die letzte Notiz“</span>
+              <span>„Rückgängig“</span>
+            </div>
+          </div>
+        </details>
+        <details>
+          <summary>Wie lege ich Viovi auf meinen Startbildschirm?</summary>
+          <div class="answer">
+            <p><b>iPhone (Safari):</b></p>
+            <ol><li>Tippe unten auf das Teilen-Symbol (Quadrat mit Pfeil).</li><li>Wähle „Zum Home-Bildschirm“.</li><li>Tippe auf „Hinzufügen“.</li></ol>
+            <p><b>Android (Chrome):</b></p>
+            <ol><li>Tippe oben rechts auf die drei Punkte ⋮.</li><li>Wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“.</li></ol>
+          </div>
+        </details>
+        <details>
+          <summary>Was ist „Freihand“?</summary>
+          <div class="answer">
+            <p>Wenn Freihand eingeschaltet ist, hört Viovi nach jeder Antwort automatisch weiter zu. So musst du nicht jedes Mal aufs Mikrofon tippen – praktisch beim Kochen oder Autofahren.</p>
+            <p>Du findest den Schalter oben rechts im <b>Menü</b> (Personen-Symbol).</p>
+          </div>
+        </details>
+        <details>
+          <summary>Wie ändere ich einen Termin, eine Notiz oder Erinnerung?</summary>
+          <div class="answer">
+            <p>Tippe auf den Eintrag oder auf den <b>Stift ✏️</b> daneben. Dann kannst du Text, Datum und Uhrzeit ändern und auf „<b>Speichern</b>“ tippen.</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="section-title">Konto</p>
+      <div class="card">
+        <details>
+          <summary>Brauche ich ein Konto?</summary>
+          <div class="answer">
+            <p>Nein. Mit „<b>Ohne Konto weiter</b>“ bleiben deine Daten nur auf diesem Gerät. Mit Konto (Google oder E-Mail) sind sie auf allen deinen Geräten gleich und gehen beim Handywechsel nicht verloren.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Wie melde ich mich mit E-Mail an?</summary>
+          <div class="answer">
+            <p>Gib deine E-Mail-Adresse ein. Du bekommst einen <b>Code</b> per E-Mail – tippe ihn in Viovi ein. Ein Passwort brauchst du nicht.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Wie lösche ich mein Konto?</summary>
+          <div class="answer">
+            <p>Tippe oben rechts auf das <b>Personen-Symbol</b> → „<b>Konto löschen</b>“ und bestätige. Dein Konto und alle Daten in der Cloud werden dann endgültig gelöscht.</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="section-title">Erinnerungen</p>
+      <div class="card">
+        <details>
+          <summary>Warum kommt meine Erinnerung nicht?</summary>
+          <div class="answer">
+            <p>Viovi kann dich im Moment nur erinnern, <b>solange die App geöffnet ist</b> (auch im Hintergrund). Wenn du sie ganz schließt, kommt keine Meldung.</p>
+            <p>Erlaube außerdem die <b>Benachrichtigungen</b>: Tippe dazu oben rechts auf die Glocke 🔔.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Wie hake ich eine Erinnerung ab?</summary>
+          <div class="answer">
+            <p>Tippe auf das Kästchen daneben – oder sag einfach „<b>Wäsche erledigt</b>“.</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="section-title">Probleme</p>
+      <div class="card">
+        <details>
+          <summary>Das Mikrofon funktioniert nicht</summary>
+          <div class="answer">
+            <ul>
+              <li>Erlaube Viovi den Zugriff aufs Mikrofon, wenn das Handy fragt.</li>
+              <li>Prüfe, ob du <b>Internet</b> hast – die Spracherkennung braucht es.</li>
+              <li>Benutze <b>Safari</b> (iPhone) oder <b>Chrome</b> (Android).</li>
+            </ul>
+          </div>
+        </details>
+        <details>
+          <summary>Ich habe aus Versehen etwas gelöscht</summary>
+          <div class="answer">
+            <p>Sag sofort „<b>Rückgängig</b>“ – dann ist es wieder da.</p>
+          </div>
+        </details>
+      </div>
+
+      <p class="section-title">Deine Daten</p>
+      <div class="card">
+        <details>
+          <summary>Wo werden meine Daten gespeichert?</summary>
+          <div class="answer">
+            <p>Nur <b>auf deinem Handy</b>. Viovi lädt deine Termine und Notizen nirgendwo hoch.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Sind meine Daten auf allen Geräten gleich?</summary>
+          <div class="answer">
+            <p>Noch nicht. Da alles nur auf dem jeweiligen Gerät liegt, siehst du auf dem PC andere Einträge als auf dem Handy.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Was passiert, wenn ich den Browser-Speicher lösche?</summary>
+          <div class="answer">
+            <p>Dann sind deine Einträge weg, weil sie nur im Browser gespeichert sind. Lösche die Website-Daten von Viovi also besser nicht.</p>
+          </div>
+        </details>
+      </div>
+
+      <a class="cta light" href="./?intro=1">Einführung nochmal ansehen</a>
+      <a class="cta" href="./">Zurück zu Viovi</a>
+    </div>
+  </main>
+</body>
+</html>
