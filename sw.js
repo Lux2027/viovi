@@ -1,6 +1,6 @@
 /* Viovi Service Worker: macht die App offline startbar.
    Strategie: erst Netz (immer aktuell), bei fehlendem Netz der Zwischenspeicher. */
-const CACHE = 'viovi-v2';
+const CACHE = 'viovi-v3';
 const FILES = ['./', 'index.html', 'style.css', 'parser.js', 'app.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {

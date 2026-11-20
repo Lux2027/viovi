@@ -387,7 +387,7 @@
 
   function render() {
     const today = startOfDay(new Date());
-    $('today-label').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    $('today-label').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
 
     // Heute
     fill($('today-events'), eventsOn(today).map((e) => eventLi(e)), 'Heute keine Termine.');
