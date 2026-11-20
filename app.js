@@ -467,6 +467,14 @@
     speaking = false;
     if (listening) stopListening(); else startListening();
   };
+  // Tastatur-Knopf blendet das Eingabefeld ein/aus
+  $('kbd-btn').onclick = () => {
+    const form = $('text-form');
+    const show = form.classList.toggle('hidden') === false;
+    $('kbd-btn').classList.toggle('active', show);
+    if (show) $('text-input').focus();
+  };
+  $('help-btn').onclick = () => { showUser('„Hilfe“'); handleInput('Hilfe'); };
   $('handsfree').onchange = (e) => {
     if (e.target.checked) { askNotify(); startListening(); } else stopListening();
   };

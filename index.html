@@ -103,13 +103,15 @@
   <footer class="dock">
     <div id="bubble-user" class="bubble user hidden"></div>
     <div id="bubble-bot" class="bubble bot">Hallo! Tippe auf das Mikrofon und sag, was du möchtest. Sag „Hilfe“, um alle Befehle zu hören.</div>
+    <form id="text-form" class="text-form hidden">
+      <input id="text-input" type="text" placeholder="Befehl eintippen …" autocomplete="off" enterkeyhint="send">
+    </form>
     <div class="dock-row">
-      <form id="text-form" class="text-form">
-        <input id="text-input" type="text" placeholder="…oder hier tippen" autocomplete="off">
-      </form>
+      <button id="kbd-btn" class="side-btn" aria-label="Tastatur" title="Eintippen statt sprechen">⌨️</button>
       <button id="mic" class="mic" aria-label="Sprechen">
-        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
       </button>
+      <button id="help-btn" class="side-btn" aria-label="Hilfe" title="Alle Befehle anzeigen">?</button>
     </div>
   </footer>
 
